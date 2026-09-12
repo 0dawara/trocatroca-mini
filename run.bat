@@ -1,5 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
+cd /d "%~dp0"
 set "JAVA_HOME=%USERPROFILE%\.jdks\temurin-25.0.4.1"
 if not exist "%JAVA_HOME%\bin\javac.exe" set "JAVA_HOME=%JAVA_HOME_OVERRIDE%"
 chcp 65001 >nul

@@ -15,6 +15,7 @@ O TrocaTroca Mini é uma versão terminal, em memória, do núcleo desse sistema
 ## Como executar
 
 - **Windows**: execute `run.bat` na raiz do projeto (compila e roda automaticamente).
+- **Linux/macOS**: execute `sh run.sh` na raiz do projeto (usa `javac`/`java` do `PATH`; requer JDK ≥ 21 instalado; não depende do bit de execução do arquivo).
 - **Requisito**: JDK 25 (ou qualquer JDK ≥ 21; o código não usa recursos exclusivos do 25). O script procura o JDK em `%USERPROFILE%\.jdks\temurin-25.0.4.1`; se não existir, defina a variável de ambiente `JAVA_HOME_OVERRIDE` apontando para outro JDK instalado.
 - **IntelliJ IDEA**: abra a pasta `trocatroca-mini` como projeto e rode a classe `br.unifor.trocatroca.Main` (o source root `src` já está configurado).
 
@@ -69,3 +70,13 @@ O TrocaTroca Mini é uma versão terminal, em memória, do núcleo desse sistema
 | Creator | GRASP | `ComentarioServico.criar` | O serviço já tem os dados (anúncio e autor resolvidos) para montar o `Comentario`. |
 | Protected Variations | GRASP | Lista de `ObservadorComentario` em `ComentarioServico` | Novos tipos de notificação são adicionados via `adicionarObservador`, sem alterar o código do serviço. |
 | Pure Fabrication | GRASP | `ComentarioRepositorio` | Isola a persistência em memória do comentário. |
+
+## Prints
+
+Colocar as capturas de tela em `docs/prints/` (arquivo `.gitkeep` reservando a pasta), cobrindo pelo menos:
+
+- Menu principal.
+- Listar e cadastrar de cada cadastro (Usuário, Anúncio, Comentário).
+- Transição de estado de um anúncio (reservar/concluir troca/reabrir).
+- Notificação ao dono ao cadastrar um comentário.
+- Desfazer de uma edição ou exclusão de comentário.

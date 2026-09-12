@@ -13,6 +13,8 @@ import br.unifor.trocatroca.usuario.UsuarioMenu;
 import br.unifor.trocatroca.usuario.UsuarioRepositorio;
 import br.unifor.trocatroca.usuario.UsuarioServico;
 
+import java.util.NoSuchElementException;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -33,20 +35,24 @@ public class Main {
         ComentarioMenu comentarioMenu = new ComentarioMenu(comentarioServico);
 
         Console console = Console.get();
-        while (true) {
-            console.titulo("TrocaTroca Mini");
-            console.info("1 - Usuários\n2 - Anúncios\n3 - Comentários\n0 - Sair");
-            int opcao = console.lerInt("Opção");
-            switch (opcao) {
-                case 1 -> usuarioMenu.executar();
-                case 2 -> anuncioMenu.executar();
-                case 3 -> comentarioMenu.executar();
-                case 0 -> {
-                    console.info("Até logo!");
-                    return;
+        try {
+            while (true) {
+                console.titulo("TrocaTroca Mini");
+                console.info("1 - Usuários\n2 - Anúncios\n3 - Comentários\n0 - Sair");
+                int opcao = console.lerInt("Opção");
+                switch (opcao) {
+                    case 1 -> usuarioMenu.executar();
+                    case 2 -> anuncioMenu.executar();
+                    case 3 -> comentarioMenu.executar();
+                    case 0 -> {
+                        console.info("Até logo!");
+                        return;
+                    }
+                    default -> console.erro("Opção inválida.");
                 }
-                default -> console.erro("Opção inválida.");
             }
+        } catch (NoSuchElementException e) {
+            console.info("\nAté logo!");
         }
     }
 }
