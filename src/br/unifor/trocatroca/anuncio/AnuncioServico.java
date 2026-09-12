@@ -37,12 +37,13 @@ public class AnuncioServico {
 
     public Anuncio editar(Long id, String titulo, String descricao, Categoria categoria, Condicao condicao, String trocaDesejada) {
         Anuncio anuncio = buscar(id);
+        // valida os novos dados num objeto descartável (mesmo dono) antes de tocar na entidade persistida.
+        new Anuncio(titulo, descricao, categoria, condicao, trocaDesejada, anuncio.getDono());
         anuncio.setTitulo(titulo);
         anuncio.setDescricao(descricao);
         anuncio.setCategoria(categoria);
         anuncio.setCondicao(condicao);
         anuncio.setTrocaDesejada(trocaDesejada);
-        anuncio.validar();
         return repositorio.salvar(anuncio);
     }
 

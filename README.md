@@ -58,3 +58,14 @@ O TrocaTroca Mini é uma versão terminal, em memória, do núcleo desse sistema
 | Polymorphism | GRASP | Estados (`EstadoAnuncio`) e filtros (`FiltroAnuncio`) | Cada implementação responde de forma própria a `reservar()`/`aceita()`, eliminando condicionais por tipo. |
 | Low Coupling | GRASP | `AnuncioServico` depende de `Repositorio<Usuario>`, não de `UsuarioMenu` ou `UsuarioServico` | O módulo de anúncio só conhece a abstração de repositório de usuários, reduzindo o acoplamento entre módulos. |
 | Pure Fabrication | GRASP | `AnuncioRepositorio` | Isola a persistência em memória do anúncio. |
+
+### Comentário
+
+| Padrão | Tipo | Onde | Por quê |
+|---|---|---|---|
+| Observer | GoF | `ObservadorComentario` / `NotificadorDono` | O dono do anúncio precisa ser avisado de novos comentários sem que `ComentarioServico` conheça detalhes de como a notificação é entregue; novos observadores podem ser plugados sem alterar o serviço. |
+| Command | GoF | `Comando`, `ComandoEditarComentario`, `ComandoExcluirComentario` | Editar e excluir viram objetos executáveis com `desfazer()`, permitindo empilhar um histórico e reverter a última operação. |
+| Controller | GRASP | `ComentarioMenu` | Traduz a interação do terminal em chamadas ao `ComentarioServico`. |
+| Creator | GRASP | `ComentarioServico.criar` | O serviço já tem os dados (anúncio e autor resolvidos) para montar o `Comentario`. |
+| Protected Variations | GRASP | Lista de `ObservadorComentario` em `ComentarioServico` | Novos tipos de notificação são adicionados via `adicionarObservador`, sem alterar o código do serviço. |
+| Pure Fabrication | GRASP | `ComentarioRepositorio` | Isola a persistência em memória do comentário. |

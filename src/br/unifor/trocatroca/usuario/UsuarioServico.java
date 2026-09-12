@@ -16,10 +16,10 @@ public class UsuarioServico {
     }
 
     public Usuario criar(String nome, String apelido, String email, String cidade, String bio, List<String> interesses) {
+        verificarUnicidade(apelido, email, null);
         Usuario usuario = Usuario.builder()
                 .nome(nome).apelido(apelido).email(email).cidade(cidade).bio(bio).interesses(interesses)
                 .build();
-        verificarUnicidade(usuario, null);
         return repositorio.salvar(usuario);
     }
 
@@ -34,14 +34,15 @@ public class UsuarioServico {
 
     public Usuario editar(Long id, String nome, String apelido, String email, String cidade, String bio, List<String> interesses) {
         Usuario usuario = buscar(id);
+        // valida o formato dos novos dados num objeto descartável antes de tocar na entidade persistida.
+        Usuario.builder().nome(nome).apelido(apelido).email(email).cidade(cidade).bio(bio).interesses(interesses).build();
+        verificarUnicidade(apelido, email, id);
         usuario.setNome(nome);
         usuario.setApelido(apelido);
         usuario.setEmail(email);
         usuario.setCidade(cidade);
         usuario.setBio(bio);
         usuario.setInteresses(interesses);
-        usuario.validar();
-        verificarUnicidade(usuario, id);
         return repositorio.salvar(usuario);
     }
 
@@ -53,16 +54,16 @@ public class UsuarioServico {
         repositorio.remover(id);
     }
 
-    private void verificarUnicidade(Usuario usuario, Long idAtual) {
-        repositorio.buscarPorEmail(usuario.getEmail())
-                .filter(outro -> !outro.getId().equals(idAtual))
-                .ifPresent(outro -> {
-                    throw new ValidacaoException("E-mail já cadastrado.");
-                });
-        repositorio.buscarPorApelido(usuario.getApelido())
-                .filter(outro -> !outro.getId().equals(idAtual))
-                .ifPresent(outro -> {
-                    throw new ValidacaoException("Apelido já em uso.");
-                });
+    private void verificarUnicidade(String apelido, String email, Long idAtual) {
+        boolean emailEmUso = repositorio.listar().stream()
+                .anyMatch(u -> !u.getId().equals(idAtual) && u.getEmail().equalsIgnoreCase(email));
+        if (emailEmUso) {
+            throw new ValidacaoException("E-mail já cadastrado.");
+        }
+        boolean apelidoEmUso = repositorio.listar().stream()
+                .anyMatch(u -> !u.getId().equals(idAtual) && u.getApelido().equalsIgnoreCase(apelido));
+        if (apelidoEmUso) {
+            throw new ValidacaoException("Apelido já em uso.");
+        }
     }
 }
