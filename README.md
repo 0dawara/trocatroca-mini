@@ -27,3 +27,12 @@ O TrocaTroca Mini é uma versão terminal, em memória, do núcleo desse sistema
 | Comentário | Cadastrar, listar, listar por anúncio, detalhar, editar, excluir, desfazer última edição/exclusão | Leonardo |
 
 ## Padrões utilizados
+
+### Compartilhados
+
+| Padrão | Tipo | Onde | Por quê |
+|---|---|---|---|
+| Template Method | GoF | `MenuCrud<T>` | O fluxo do menu (mostrar opções, ler escolha, tratar erro) é fixo; cada cadastro só implementa os passos de CRUD (`cadastrar`, `listar`, etc.) e pode adicionar opções extras via hooks. |
+| Singleton | GoF | `Console` | Uma única instância concentra leitura/escrita no terminal, evitando `Scanner`s concorrentes sobre `System.in`. |
+| Pure Fabrication | GRASP | `Repositorio<T>` / `RepositorioEmMemoria<T>` | Persistência em memória não é responsabilidade natural de nenhuma entidade de domínio; foi isolada em uma classe fabricada para isso. |
+| Indirection | GRASP | Predicados de exclusão injetados no `Main` (ex. `anuncioRepo::existePorDono`) | Evita que `usuario` dependa de `anuncio` (ou `anuncio` de `comentario`) para checar integridade referencial na exclusão; o `Main` liga as pontas. |
