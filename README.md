@@ -47,3 +47,14 @@ O TrocaTroca Mini é uma versão terminal, em memória, do núcleo desse sistema
 | Creator | GRASP | `UsuarioServico.criar` | O serviço que já agrega os dados necessários (repositório, regras de unicidade) é quem monta o `Usuario`. |
 | Information Expert | GRASP | `Usuario.validar()` | A própria entidade é quem tem os dados para decidir se nome, apelido e e-mail são válidos. |
 | Pure Fabrication | GRASP | `UsuarioRepositorio` | Isola a persistência em memória do usuário, mantendo a entidade livre de lógica de armazenamento. |
+
+### Anúncio
+
+| Padrão | Tipo | Onde | Por quê |
+|---|---|---|---|
+| State | GoF | `EstadoAnuncio` + `Disponivel`/`Reservado`/`Trocado` | O comportamento de `reservar`/`concluirTroca`/`reabrir` muda conforme o estado atual; cada transição válida (e cada erro) fica isolada na classe do estado correspondente, sem `if/switch` espalhado. |
+| Strategy | GoF | `FiltroAnuncio` + `FiltroPorCategoria`/`FiltroPorDono`/`FiltroPorEstado` | A forma de filtrar a listagem de anúncios varia; cada critério é uma estratégia intercambiável escolhida em tempo de execução pelo menu. |
+| Controller | GRASP | `AnuncioMenu` | Traduz a interação do terminal em chamadas ao `AnuncioServico`. |
+| Polymorphism | GRASP | Estados (`EstadoAnuncio`) e filtros (`FiltroAnuncio`) | Cada implementação responde de forma própria a `reservar()`/`aceita()`, eliminando condicionais por tipo. |
+| Low Coupling | GRASP | `AnuncioServico` depende de `Repositorio<Usuario>`, não de `UsuarioMenu` ou `UsuarioServico` | O módulo de anúncio só conhece a abstração de repositório de usuários, reduzindo o acoplamento entre módulos. |
+| Pure Fabrication | GRASP | `AnuncioRepositorio` | Isola a persistência em memória do anúncio. |
