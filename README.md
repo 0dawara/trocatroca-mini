@@ -36,3 +36,14 @@ O TrocaTroca Mini é uma versão terminal, em memória, do núcleo desse sistema
 | Singleton | GoF | `Console` | Uma única instância concentra leitura/escrita no terminal, evitando `Scanner`s concorrentes sobre `System.in`. |
 | Pure Fabrication | GRASP | `Repositorio<T>` / `RepositorioEmMemoria<T>` | Persistência em memória não é responsabilidade natural de nenhuma entidade de domínio; foi isolada em uma classe fabricada para isso. |
 | Indirection | GRASP | Predicados de exclusão injetados no `Main` (ex. `anuncioRepo::existePorDono`) | Evita que `usuario` dependa de `anuncio` (ou `anuncio` de `comentario`) para checar integridade referencial na exclusão; o `Main` liga as pontas. |
+
+### Usuário
+
+| Padrão | Tipo | Onde | Por quê |
+|---|---|---|---|
+| Singleton | GoF | `UsuarioRepositorio.getInstancia()` | Garante um único repositório de usuários compartilhado por toda a aplicação, sem passar a instância manualmente entre camadas. |
+| Builder | GoF | `Usuario.Builder` | `Usuario` tem vários campos opcionais (cidade, bio, interesses); o Builder monta o objeto passo a passo e centraliza a chamada a `validar()` na construção. |
+| Controller | GRASP | `UsuarioMenu` | Recebe a interação do terminal e delega ao `UsuarioServico`, sem conter regra de negócio. |
+| Creator | GRASP | `UsuarioServico.criar` | O serviço que já agrega os dados necessários (repositório, regras de unicidade) é quem monta o `Usuario`. |
+| Information Expert | GRASP | `Usuario.validar()` | A própria entidade é quem tem os dados para decidir se nome, apelido e e-mail são válidos. |
+| Pure Fabrication | GRASP | `UsuarioRepositorio` | Isola a persistência em memória do usuário, mantendo a entidade livre de lógica de armazenamento. |
