@@ -16,7 +16,7 @@ O TrocaTroca Mini é uma versão terminal, em memória, do núcleo desse sistema
 
 - **Windows**: execute `run.bat` na raiz do projeto (compila e roda automaticamente).
 - **Linux/macOS**: execute `sh run.sh` na raiz do projeto (usa `javac`/`java` do `PATH`; requer JDK ≥ 21 instalado; não depende do bit de execução do arquivo).
-- **Requisito**: JDK 25 (ou qualquer JDK ≥ 21; o código não usa recursos exclusivos do 25). O script procura o JDK em `%USERPROFILE%\.jdks\temurin-25.0.4.1`; se não existir, defina a variável de ambiente `JAVA_HOME_OVERRIDE` apontando para outro JDK instalado.
+- **Requisito**: JDK 25 (ou qualquer JDK ≥ 21; o código não usa recursos exclusivos do 25). O script `run.bat` detecta automaticamente o JDK instalado no sistema (verificando `JAVA_HOME`, `PATH`, diretórios do IntelliJ IDEA, Program Files, gerenciadores de pacotes como Scoop/Chocolatey e Registro do Windows, priorizando JDK 25 e versões recentes). Caso queira apontar para um JDK específico manualmente, defina a variável de ambiente `JAVA_HOME_OVERRIDE`.
 - **IntelliJ IDEA**: abra a pasta `trocatroca-mini` como projeto e rode a classe `br.unifor.trocatroca.Main` (o source root `src` já está configurado).
 
 ## Cadastros
