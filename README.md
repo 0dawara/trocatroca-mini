@@ -29,6 +29,8 @@ O TrocaTroca Mini é uma versão terminal, em memória, do núcleo desse sistema
 
 ## Padrões utilizados
 
+Cada integrante é responsável por um cadastro contendo exatamente **2 padrões GoF + 2 padrões GRASP**. Os padrões compartilhados abaixo pertencem à infraestrutura comum do projeto e **não contam na cota individual**.
+
 ### Compartilhados
 
 | Padrão | Tipo | Onde | Por quê |
@@ -38,38 +40,32 @@ O TrocaTroca Mini é uma versão terminal, em memória, do núcleo desse sistema
 | Pure Fabrication | GRASP | `Repositorio<T>` / `RepositorioEmMemoria<T>` | Persistência em memória não é responsabilidade natural de nenhuma entidade de domínio; foi isolada em uma classe fabricada para isso. |
 | Indirection | GRASP | Predicados de exclusão injetados no `Main` (ex. `anuncioRepo::existePorDono`) | Evita que `usuario` dependa de `anuncio` (ou `anuncio` de `comentario`) para checar integridade referencial na exclusão; o `Main` liga as pontas. |
 
-### Usuário
+### Usuário — Thiago Leal Menezes
 
 | Padrão | Tipo | Onde | Por quê |
 |---|---|---|---|
 | Singleton | GoF | `UsuarioRepositorio.getInstancia()` | Garante um único repositório de usuários compartilhado por toda a aplicação, sem passar a instância manualmente entre camadas. |
-| Builder | GoF | `Usuario.Builder` | `Usuario` tem vários campos opcionais (cidade, bio, interesses); o Builder monta o objeto passo a passo e centraliza a chamada a `validar()` na construção. |
+| Factory Method | GoF | `CriadorUsuario` (`CriadorUsuarioBasico` / `CriadorUsuarioCompleto`) | O menu escolhe o criador (`cadastro rápido` vs `cadastro completo`) e cada subclasse decide como instanciar o `Usuario`; o método template `criar` centraliza a validação comum. |
+| Creator | GRASP | `UsuarioServico.criar` | O serviço que já agrega os dados necessários (repositório, regras de unicidade) é quem coordena a criação do `Usuario`, delegando a instanciação ao criador. |
 | Controller | GRASP | `UsuarioMenu` | Recebe a interação do terminal e delega ao `UsuarioServico`, sem conter regra de negócio. |
-| Creator | GRASP | `UsuarioServico.criar` | O serviço que já agrega os dados necessários (repositório, regras de unicidade) é quem monta o `Usuario`. |
-| Information Expert | GRASP | `Usuario.validar()` | A própria entidade é quem tem os dados para decidir se nome, apelido e e-mail são válidos. |
-| Pure Fabrication | GRASP | `UsuarioRepositorio` | Isola a persistência em memória do usuário, mantendo a entidade livre de lógica de armazenamento. |
 
-### Anúncio
+### Anúncio — Francisco Alzir Lima Junior
 
 | Padrão | Tipo | Onde | Por quê |
 |---|---|---|---|
-| State | GoF | `EstadoAnuncio` + `Disponivel`/`Reservado`/`Trocado` | O comportamento de `reservar`/`concluirTroca`/`reabrir` muda conforme o estado atual; cada transição válida (e cada erro) fica isolada na classe do estado correspondente, sem `if/switch` espalhado. |
-| Strategy | GoF | `FiltroAnuncio` + `FiltroPorCategoria`/`FiltroPorDono`/`FiltroPorEstado` | A forma de filtrar a listagem de anúncios varia; cada critério é uma estratégia intercambiável escolhida em tempo de execução pelo menu. |
+| Abstract Factory | GoF | `FabricaNotificacaoAnuncio` (`NotificacaoAnuncioConsole` / `NotificacaoAnuncioSilenciosa`) | Cria a família coerente de observadores (notificador do dono e registro de histórico); o `Main` troca a família inteira para carregar a massa inicial em silêncio. |
+| Observer | GoF | `ObservadorAnuncio` (`NotificadorDonoAnuncio`, `RegistroEstadoAnuncio`) | O serviço avisa mudanças de estado sem conhecer o destino das mensagens; novos observadores podem ser plugados sem alterar o serviço. |
+| Creator | GRASP | `AnuncioServico.criar` | O serviço que já tem as dependências necessárias (resolve o dono pelo id e valida) instancia o `Anuncio`. |
 | Controller | GRASP | `AnuncioMenu` | Traduz a interação do terminal em chamadas ao `AnuncioServico`. |
-| Polymorphism | GRASP | Estados (`EstadoAnuncio`) e filtros (`FiltroAnuncio`) | Cada implementação responde de forma própria a `reservar()`/`aceita()`, eliminando condicionais por tipo. |
-| Low Coupling | GRASP | `AnuncioServico` depende de `Repositorio<Usuario>`, não de `UsuarioMenu` ou `UsuarioServico` | O módulo de anúncio só conhece a abstração de repositório de usuários, reduzindo o acoplamento entre módulos. |
-| Pure Fabrication | GRASP | `AnuncioRepositorio` | Isola a persistência em memória do anúncio. |
 
-### Comentário
+### Comentário — Leonardo Oliveira Freitas de Matos
 
 | Padrão | Tipo | Onde | Por quê |
 |---|---|---|---|
-| Observer | GoF | `ObservadorComentario` / `NotificadorDono` | O dono do anúncio precisa ser avisado de novos comentários sem que `ComentarioServico` conheça detalhes de como a notificação é entregue; novos observadores podem ser plugados sem alterar o serviço. |
-| Command | GoF | `Comando`, `ComandoEditarComentario`, `ComandoExcluirComentario` | Editar e excluir viram objetos executáveis com `desfazer()`, permitindo empilhar um histórico e reverter a última operação. |
-| Controller | GRASP | `ComentarioMenu` | Traduz a interação do terminal em chamadas ao `ComentarioServico`. |
-| Creator | GRASP | `ComentarioServico.criar` | O serviço já tem os dados (anúncio e autor resolvidos) para montar o `Comentario`. |
-| Protected Variations | GRASP | Lista de `ObservadorComentario` em `ComentarioServico` | Novos tipos de notificação são adicionados via `adicionarObservador`, sem alterar o código do serviço. |
-| Pure Fabrication | GRASP | `ComentarioRepositorio` | Isola a persistência em memória do comentário. |
+| Abstract Factory | GoF | `FabricaNotificacaoComentario` (`NotificacaoComentarioConsole` / `NotificacaoComentarioSilenciosa`) | Cria a família coerente de observadores (notificador do dono e registro de atividade); permite alternar entre saída em console e execução silenciosa na carga inicial. |
+| Observer | GoF | `ObservadorComentario` (`NotificadorDono`, `RegistroAtividadeComentario`) | O dono do anúncio é avisado de novos comentários e a atividade é registrada sem que `ComentarioServico` conheça detalhes da saída. |
+| Low Coupling | GRASP | `ComentarioServico` | Depende apenas de abstrações (`Repositorio<Anuncio>`, `Repositorio<Usuario>`, `ObservadorComentario`, `FabricaNotificacaoComentario`), nunca dos menus ou serviços concretos de outros módulos. |
+| High Cohesion | GRASP | `HistoricoComentario` e separação de responsabilidades | Responsabilidades claramente isoladas em classes coesas: `ComentarioServico` cuida das regras de negócio, `HistoricoComentario` gerencia o desfazer, `ComentarioRepositorio` a persistência e os observadores a saída. |
 
 ## Prints
 
@@ -79,4 +75,5 @@ Colocar as capturas de tela em `docs/prints/` (arquivo `.gitkeep` reservando a p
 - Listar e cadastrar de cada cadastro (Usuário, Anúncio, Comentário).
 - Transição de estado de um anúncio (reservar/concluir troca/reabrir).
 - Notificação ao dono ao cadastrar um comentário.
+- Notificação ao dono e registro no histórico ao reservar ou concluir a troca de um anúncio.
 - Desfazer de uma edição ou exclusão de comentário.
