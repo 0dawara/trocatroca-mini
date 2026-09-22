@@ -18,7 +18,7 @@ public class Anuncio implements Entidade {
     private Condicao condicao;
     private String trocaDesejada;
     private final Usuario dono;
-    private EstadoAnuncio estado = Disponivel.INSTANCIA;
+    private EstadoAnuncio estado = EstadoAnuncio.DISPONIVEL;
     private final LocalDateTime criadoEm = LocalDateTime.now();
 
     public Anuncio(String titulo, String descricao, Categoria categoria, Condicao condicao, String trocaDesejada, Usuario dono) {
@@ -47,19 +47,31 @@ public class Anuncio implements Entidade {
     }
 
     public void reservar() {
-        estado = estado.reservar();
+        switch (estado) {
+            case DISPONIVEL -> estado = EstadoAnuncio.RESERVADO;
+            case RESERVADO -> throw new ValidacaoException("Anúncio já está reservado.");
+            case TROCADO -> throw new ValidacaoException("Anúncio trocado não pode ser alterado.");
+        }
     }
 
     public void concluirTroca() {
-        estado = estado.concluirTroca();
+        switch (estado) {
+            case DISPONIVEL -> throw new ValidacaoException("Anúncio disponível precisa ser reservado antes de concluir a troca.");
+            case RESERVADO -> estado = EstadoAnuncio.TROCADO;
+            case TROCADO -> throw new ValidacaoException("Anúncio trocado não pode ser alterado.");
+        }
     }
 
     public void reabrir() {
-        estado = estado.reabrir();
+        switch (estado) {
+            case DISPONIVEL -> throw new ValidacaoException("Anúncio já está disponível.");
+            case RESERVADO -> estado = EstadoAnuncio.DISPONIVEL;
+            case TROCADO -> throw new ValidacaoException("Anúncio trocado não pode ser alterado.");
+        }
     }
 
     public String resumo() {
-        return String.format("#%d [%s] %s - %s/%s - @%s", id, estado.nome(), titulo, categoria, condicao, dono.getApelido());
+        return String.format("#%d [%s] %s - %s/%s - @%s", id, estado, titulo, categoria, condicao, dono.getApelido());
     }
 
     public String detalhes() {
@@ -70,7 +82,7 @@ public class Anuncio implements Entidade {
                 + "\nCondição: " + condicao
                 + "\nDeseja em troca: " + (trocaDesejada == null || trocaDesejada.isBlank() ? "-" : trocaDesejada)
                 + "\nDono: @" + dono.getApelido() + " - " + dono.getNome()
-                + "\nEstado: " + estado.nome()
+                + "\nEstado: " + estado
                 + "\nCriado em: " + criadoEm.format(FORMATO_DATA);
     }
 

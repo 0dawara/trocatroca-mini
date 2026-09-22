@@ -3,6 +3,8 @@ package br.unifor.trocatroca;
 import br.unifor.trocatroca.anuncio.AnuncioMenu;
 import br.unifor.trocatroca.anuncio.AnuncioRepositorio;
 import br.unifor.trocatroca.anuncio.AnuncioServico;
+import br.unifor.trocatroca.anuncio.NotificacaoAnuncioConsole;
+import br.unifor.trocatroca.anuncio.NotificacaoAnuncioSilenciosa;
 import br.unifor.trocatroca.comentario.ComentarioMenu;
 import br.unifor.trocatroca.comentario.ComentarioRepositorio;
 import br.unifor.trocatroca.comentario.ComentarioServico;
@@ -26,8 +28,11 @@ public class Main {
         AnuncioServico anuncioServico = new AnuncioServico(anuncioRepo, usuarioRepo, comentarioRepo::existePorAnuncio);
         ComentarioServico comentarioServico = new ComentarioServico(comentarioRepo, anuncioRepo, usuarioRepo);
 
+        anuncioServico.usarNotificacoes(new NotificacaoAnuncioSilenciosa());
+
         DadosIniciais.carregar(usuarioServico, anuncioServico, comentarioServico);
 
+        anuncioServico.usarNotificacoes(new NotificacaoAnuncioConsole(Console.get()));
         comentarioServico.adicionarObservador(new NotificadorDono(Console.get()));
 
         UsuarioMenu usuarioMenu = new UsuarioMenu(usuarioServico);

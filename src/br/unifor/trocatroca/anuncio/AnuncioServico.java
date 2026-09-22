@@ -4,6 +4,7 @@ import br.unifor.trocatroca.infra.Repositorio;
 import br.unifor.trocatroca.infra.ValidacaoException;
 import br.unifor.trocatroca.usuario.Usuario;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -13,10 +14,17 @@ public class AnuncioServico {
     private final Repositorio<Usuario> usuarios;
     private final Predicate<Long> possuiComentarios;
 
+    private final List<ObservadorAnuncio> observadores = new ArrayList<>();
     public AnuncioServico(AnuncioRepositorio repositorio, Repositorio<Usuario> usuarios, Predicate<Long> possuiComentarios) {
         this.repositorio = repositorio;
         this.usuarios = usuarios;
         this.possuiComentarios = possuiComentarios;
+    }
+
+    public void usarNotificacoes(FabricaNotificacaoAnuncio fabrica) {
+        observadores.clear();
+        observadores.add(fabrica.criarNotificadorDono());
+        observadores.add(fabrica.criarRegistroDeEstado());
     }
 
     public Anuncio criar(String titulo, String descricao, Categoria categoria, Condicao condicao, String trocaDesejada, Long donoId) {
@@ -31,8 +39,14 @@ public class AnuncioServico {
                 .orElseThrow(() -> new ValidacaoException("Anúncio #" + id + " não encontrado."));
     }
 
-    public List<Anuncio> listar(FiltroAnuncio filtro) {
-        return repositorio.filtrar(filtro::aceita);
+    public List<Anuncio> listar() {
+        return listar(null, null, null);
+    }
+
+    public List<Anuncio> listar(Categoria categoria, Long donoId, EstadoAnuncio estado) {
+        return repositorio.filtrar(anuncio -> (categoria == null || anuncio.getCategoria() == categoria)
+                && (donoId == null || anuncio.getDono().getId().equals(donoId))
+                && (estado == null || anuncio.getEstado() == estado));
     }
 
     public Anuncio editar(Long id, String titulo, String descricao, Categoria categoria, Condicao condicao, String trocaDesejada) {
@@ -49,20 +63,30 @@ public class AnuncioServico {
 
     public void reservar(Long id) {
         Anuncio anuncio = buscar(id);
+        EstadoAnuncio anterior = anuncio.getEstado();
         anuncio.reservar();
         repositorio.salvar(anuncio);
+        notificar(anuncio, anterior);
     }
 
     public void concluirTroca(Long id) {
         Anuncio anuncio = buscar(id);
+        EstadoAnuncio anterior = anuncio.getEstado();
         anuncio.concluirTroca();
         repositorio.salvar(anuncio);
+        notificar(anuncio, anterior);
     }
 
     public void reabrir(Long id) {
         Anuncio anuncio = buscar(id);
+        EstadoAnuncio anterior = anuncio.getEstado();
         anuncio.reabrir();
         repositorio.salvar(anuncio);
+        notificar(anuncio, anterior);
+    }
+
+    private void notificar(Anuncio anuncio, EstadoAnuncio estadoAnterior) {
+        observadores.forEach(observador -> observador.aoMudarEstado(anuncio, estadoAnterior));
     }
 
     public void excluir(Long id) {

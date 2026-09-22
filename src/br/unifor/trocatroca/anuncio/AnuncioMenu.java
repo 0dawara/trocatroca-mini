@@ -32,19 +32,19 @@ public class AnuncioMenu extends MenuCrud<Anuncio> {
             case 6 -> {
                 Anuncio anuncio = servico.buscar(console.lerLong("Id"));
                 servico.reservar(anuncio.getId());
-                console.info("Anúncio agora está " + anuncio.getEstado().nome() + ".");
+                console.info("Anúncio agora está " + anuncio.getEstado().name() + ".");
                 return true;
             }
             case 7 -> {
                 Anuncio anuncio = servico.buscar(console.lerLong("Id"));
                 servico.concluirTroca(anuncio.getId());
-                console.info("Anúncio agora está " + anuncio.getEstado().nome() + ".");
+                console.info("Anúncio agora está " + anuncio.getEstado().name() + ".");
                 return true;
             }
             case 8 -> {
                 Anuncio anuncio = servico.buscar(console.lerLong("Id"));
                 servico.reabrir(anuncio.getId());
-                console.info("Anúncio agora está " + anuncio.getEstado().nome() + ".");
+                console.info("Anúncio agora está " + anuncio.getEstado().name() + ".");
                 return true;
             }
             default -> {
@@ -75,13 +75,10 @@ public class AnuncioMenu extends MenuCrud<Anuncio> {
     protected void listar() {
         console.info("1 - Todos\n2 - Por categoria\n3 - Por dono\n4 - Por estado");
         int opcao = console.lerInt("Opção");
-        FiltroAnuncio filtro = switch (opcao) {
-            case 2 -> new FiltroPorCategoria(console.lerEnum("Categoria", Categoria.class));
-            case 3 -> new FiltroPorDono(console.lerLong("Id do dono"));
-            case 4 -> new FiltroPorEstado(console.lerTexto("Estado").toUpperCase());
-            default -> a -> true;
-        };
-        List<Anuncio> anuncios = servico.listar(filtro);
+        Categoria categoria = opcao == 2 ? console.lerEnum("Categoria", Categoria.class) : null;
+        Long donoId = opcao == 3 ? console.lerLong("Id do dono") : null;
+        EstadoAnuncio estado = opcao == 4 ? console.lerEnum("Estado", EstadoAnuncio.class) : null;
+        List<Anuncio> anuncios = servico.listar(categoria, donoId, estado);
         if (anuncios.isEmpty()) {
             console.info("Nenhum anúncio encontrado.");
             return;
