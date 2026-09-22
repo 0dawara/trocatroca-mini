@@ -5,9 +5,7 @@ import br.unifor.trocatroca.infra.Repositorio;
 import br.unifor.trocatroca.infra.ValidacaoException;
 import br.unifor.trocatroca.usuario.Usuario;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 
 public class ComentarioServico {
@@ -16,16 +14,19 @@ public class ComentarioServico {
     private final Repositorio<Anuncio> anuncios;
     private final Repositorio<Usuario> usuarios;
     private final List<ObservadorComentario> observadores = new ArrayList<>();
-    private final Deque<Comando> historico = new ArrayDeque<>();
+    private final HistoricoComentario historico;
 
     public ComentarioServico(ComentarioRepositorio repositorio, Repositorio<Anuncio> anuncios, Repositorio<Usuario> usuarios) {
         this.repositorio = repositorio;
         this.anuncios = anuncios;
         this.usuarios = usuarios;
+        this.historico = new HistoricoComentario(repositorio);
     }
 
-    public void adicionarObservador(ObservadorComentario observador) {
-        observadores.add(observador);
+    public void usarNotificacoes(FabricaNotificacaoComentario fabrica) {
+        observadores.clear();
+        observadores.add(fabrica.criarNotificadorDono());
+        observadores.add(fabrica.criarRegistroAtividade());
     }
 
     public Comentario criar(Long anuncioId, Long autorId, String conteudo) {
@@ -53,23 +54,22 @@ public class ComentarioServico {
     }
 
     public void editar(Long id, String novoConteudo) {
-        Comando comando = new ComandoEditarComentario(repositorio, buscar(id), novoConteudo);
-        comando.executar();
-        historico.push(comando);
+        Comentario comentario = buscar(id);
+        // valida o novo conteúdo num objeto descartável antes de tocar no comentário persistido.
+        new Comentario(comentario.getAnuncio(), comentario.getAutor(), novoConteudo);
+        String conteudoAnterior = comentario.getConteudo();
+        comentario.setConteudo(novoConteudo);
+        repositorio.salvar(comentario);
+        historico.registrarEdicao(comentario, conteudoAnterior);
     }
 
     public void excluir(Long id) {
-        Comando comando = new ComandoExcluirComentario(repositorio, buscar(id));
-        comando.executar();
-        historico.push(comando);
+        Comentario comentario = buscar(id);
+        repositorio.remover(id);
+        historico.registrarExclusao(comentario);
     }
 
     public String desfazer() {
-        if (historico.isEmpty()) {
-            throw new ValidacaoException("Nada para desfazer.");
-        }
-        Comando comando = historico.pop();
-        comando.desfazer();
-        return comando.descricao();
+        return historico.desfazer();
     }
 }

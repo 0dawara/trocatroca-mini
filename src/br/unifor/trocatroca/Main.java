@@ -8,7 +8,8 @@ import br.unifor.trocatroca.anuncio.NotificacaoAnuncioSilenciosa;
 import br.unifor.trocatroca.comentario.ComentarioMenu;
 import br.unifor.trocatroca.comentario.ComentarioRepositorio;
 import br.unifor.trocatroca.comentario.ComentarioServico;
-import br.unifor.trocatroca.comentario.NotificadorDono;
+import br.unifor.trocatroca.comentario.NotificacaoComentarioConsole;
+import br.unifor.trocatroca.comentario.NotificacaoComentarioSilenciosa;
 import br.unifor.trocatroca.infra.Console;
 import br.unifor.trocatroca.infra.DadosIniciais;
 import br.unifor.trocatroca.usuario.UsuarioMenu;
@@ -29,11 +30,12 @@ public class Main {
         ComentarioServico comentarioServico = new ComentarioServico(comentarioRepo, anuncioRepo, usuarioRepo);
 
         anuncioServico.usarNotificacoes(new NotificacaoAnuncioSilenciosa());
+        comentarioServico.usarNotificacoes(new NotificacaoComentarioSilenciosa());
 
         DadosIniciais.carregar(usuarioServico, anuncioServico, comentarioServico);
 
         anuncioServico.usarNotificacoes(new NotificacaoAnuncioConsole(Console.get()));
-        comentarioServico.adicionarObservador(new NotificadorDono(Console.get()));
+        comentarioServico.usarNotificacoes(new NotificacaoComentarioConsole(Console.get()));
 
         UsuarioMenu usuarioMenu = new UsuarioMenu(usuarioServico);
         AnuncioMenu anuncioMenu = new AnuncioMenu(anuncioServico, usuarioRepo);
