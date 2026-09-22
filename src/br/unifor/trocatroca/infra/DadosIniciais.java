@@ -5,6 +5,7 @@ import br.unifor.trocatroca.anuncio.Categoria;
 import br.unifor.trocatroca.anuncio.Condicao;
 import br.unifor.trocatroca.comentario.ComentarioServico;
 import br.unifor.trocatroca.usuario.UsuarioServico;
+import br.unifor.trocatroca.usuario.CriadorUsuarioCompleto;
 
 import java.util.List;
 
@@ -14,11 +15,11 @@ public final class DadosIniciais {
     }
 
     public static void carregar(UsuarioServico usuarios, AnuncioServico anuncios, ComentarioServico comentarios) {
-        usuarios.criar("Francisco Alzir Lima Junior", "alzir", "alzir@unifor.br", "Fortaleza",
+        usuarios.criar(new CriadorUsuarioCompleto(), "Francisco Alzir Lima Junior", "alzir", "alzir@unifor.br", "Fortaleza",
                 "Colecionador de games retrô", List.of("Jogos", "Eletrônicos"));
-        usuarios.criar("Leonardo Oliveira Freitas de Matos", "leo", "leo@unifor.br", "Fortaleza",
+        usuarios.criar(new CriadorUsuarioCompleto(), "Leonardo Oliveira Freitas de Matos", "leo", "leo@unifor.br", "Fortaleza",
                 "Leitor voraz", List.of("Livros", "Quadrinhos"));
-        usuarios.criar("Thiago Leal Menezes", "thiago", "thiago@unifor.br", "Fortaleza",
+        usuarios.criar(new CriadorUsuarioCompleto(), "Thiago Leal Menezes", "thiago", "thiago@unifor.br", "Fortaleza",
                 "Desapegando do que não uso", List.of("Livros", "Roupas"));
 
         anuncios.criar("Livro Clean Code", "Edição em inglês, capa levemente amassada",

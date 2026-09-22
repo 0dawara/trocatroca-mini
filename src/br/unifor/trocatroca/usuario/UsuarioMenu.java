@@ -20,14 +20,22 @@ public class UsuarioMenu extends MenuCrud<Usuario> {
 
     @Override
     protected void cadastrar() {
+        console.info("1 - Cadastro rápido (nome, apelido, e-mail)\n2 - Cadastro completo");
+        boolean completo = console.lerInt("Opção") != 1;
+        CriadorUsuario criador = completo ? new CriadorUsuarioCompleto() : new CriadorUsuarioBasico();
         String nome = console.lerTexto("Nome");
         String apelido = console.lerTexto("Apelido");
         String email = console.lerTexto("E-mail");
-        String cidade = console.lerTextoOpcional("Cidade", "");
-        String bio = console.lerTextoOpcional("Bio", "");
-        List<String> interesses = lerInteresses(console.lerTextoOpcional("Interesses (separados por vírgula)", ""));
-        Usuario usuario = servico.criar(nome, apelido, email, cidade, bio, interesses);
-        console.info("Usuário cadastrado: " + usuario.resumo());
+        String cidade = "";
+        String bio = "";
+        List<String> interesses = new ArrayList<>();
+        if (completo) {
+            cidade = console.lerTextoOpcional("Cidade", "");
+            bio = console.lerTextoOpcional("Bio", "");
+            interesses = lerInteresses(console.lerTextoOpcional("Interesses (separados por vírgula)", ""));
+        }
+        Usuario usuario = servico.criar(criador, nome, apelido, email, cidade, bio, interesses);
+        console.info("Usuário cadastrado (" + criador.rotulo() + "): " + usuario.resumo());
     }
 
     @Override

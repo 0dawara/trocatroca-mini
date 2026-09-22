@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 
 public class UsuarioServico {
 
+    private static final CriadorUsuario CRIADOR_COMPLETO = new CriadorUsuarioCompleto();
     private final UsuarioRepositorio repositorio;
     private final Predicate<Long> possuiAnuncios;
 
@@ -15,11 +16,9 @@ public class UsuarioServico {
         this.possuiAnuncios = possuiAnuncios;
     }
 
-    public Usuario criar(String nome, String apelido, String email, String cidade, String bio, List<String> interesses) {
+    public Usuario criar(CriadorUsuario criador, String nome, String apelido, String email, String cidade, String bio, List<String> interesses) {
         verificarUnicidade(apelido, email, null);
-        Usuario usuario = Usuario.builder()
-                .nome(nome).apelido(apelido).email(email).cidade(cidade).bio(bio).interesses(interesses)
-                .build();
+        Usuario usuario = criador.criar(nome, apelido, email, cidade, bio, interesses);
         return repositorio.salvar(usuario);
     }
 
@@ -35,7 +34,7 @@ public class UsuarioServico {
     public Usuario editar(Long id, String nome, String apelido, String email, String cidade, String bio, List<String> interesses) {
         Usuario usuario = buscar(id);
         // valida o formato dos novos dados num objeto descartável antes de tocar na entidade persistida.
-        Usuario.builder().nome(nome).apelido(apelido).email(email).cidade(cidade).bio(bio).interesses(interesses).build();
+        CRIADOR_COMPLETO.criar(nome, apelido, email, cidade, bio, interesses);
         verificarUnicidade(apelido, email, id);
         usuario.setNome(nome);
         usuario.setApelido(apelido);

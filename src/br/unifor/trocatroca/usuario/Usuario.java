@@ -16,18 +16,13 @@ public class Usuario implements Entidade {
     private String bio;
     private List<String> interesses;
 
-    private Usuario(Builder builder) {
-        this.nome = builder.nome;
-        this.apelido = builder.apelido;
-        this.email = builder.email;
-        this.cidade = builder.cidade;
-        this.bio = builder.bio;
-        this.interesses = builder.interesses == null ? new ArrayList<>() : builder.interesses;
-        validar();
-    }
-
-    public static Builder builder() {
-        return new Builder();
+    public Usuario(String nome, String apelido, String email, String cidade, String bio, List<String> interesses) {
+        this.nome = nome;
+        this.apelido = apelido;
+        this.email = email;
+        this.cidade = cidade;
+        this.bio = bio;
+        this.interesses = interesses == null ? new ArrayList<>() : new ArrayList<>(interesses);
     }
 
     public void validar() {
@@ -118,46 +113,4 @@ public class Usuario implements Entidade {
         this.interesses = interesses;
     }
 
-    public static class Builder {
-        private String nome;
-        private String apelido;
-        private String email;
-        private String cidade;
-        private String bio;
-        private List<String> interesses;
-
-        public Builder nome(String nome) {
-            this.nome = nome;
-            return this;
-        }
-
-        public Builder apelido(String apelido) {
-            this.apelido = apelido;
-            return this;
-        }
-
-        public Builder email(String email) {
-            this.email = email;
-            return this;
-        }
-
-        public Builder cidade(String cidade) {
-            this.cidade = cidade;
-            return this;
-        }
-
-        public Builder bio(String bio) {
-            this.bio = bio;
-            return this;
-        }
-
-        public Builder interesses(List<String> interesses) {
-            this.interesses = interesses;
-            return this;
-        }
-
-        public Usuario build() {
-            return new Usuario(this);
-        }
-    }
 }
